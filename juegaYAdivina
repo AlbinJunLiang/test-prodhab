@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego de Memoria de Protección de Datos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .game-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: opacity 0.6s ease;
+    position: relative;
+    z-index: 1;
+  }
+  h2 { font-size: 1.3rem; }
+  p { font-size: 1rem; line-height: 1.4; }
+  .scrambled {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 15px 0;
+    letter-spacing: 3px;
+    display: inline-block;
+    transition: transform 0.2s;
+  }
+  input {
+    padding: 10px;
+    font-size: 1rem;
+    width: 80%;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  button:hover { background: #45a049; }
+  .counter { margin-top: 10px; font-weight: bold; }
+  .hidden { display: none; }
+  .error-message { color: red; font-weight: bold; margin: 10px 0; min-height: 1.2em; }
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100% { transform: translateX(0); }
+  }
+  .shake { animation: shake 0.3s; }
+  canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+</style>
+</head>
+<body>
+<div class="game-container" id="game">
+  <div id="intro">
+    <h2>Lee la historia con atención 🛡️</h2>
+    <p>
+      En la empresa, siempre debemos proteger los <strong>Datos</strong> personales.  
+      Usar contraseñas <strong>Seguras</strong> y nunca compartir información <strong>Confidencial</strong> es crucial.  
+      Solo personal autorizado debe acceder al <strong>Sistema</strong> y todo acceso se registra en el <strong>Registro</strong> de auditoría.
+    </p>
+    <p><em>Recuerda bien las palabras en negrita...</em></p>
+    <button onclick="startGame()">¡Estoy listo!</button>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <h2>Adivina la palabra</h2>
+    <div class="scrambled" id="scrambled"></div>
+    <input type="text" id="guess" placeholder="Escribe la palabra">
+    <br>
+    <button onclick="checkWord()">Comprobar</button>
+    <p class="error-message" id="error"></p>
+    <p class="counter" id="counter"></p>
+  </div>
+
+  <div id="end" class="hidden">
+    <h2>¡Juego terminado! 🎉</h2>
+    <p>Has recordado todas las palabras clave sobre protección de datos.</p>
+    <button onclick="location.reload()">Jugar de nuevo</button>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<script>
+const words = ["Datos", "Seguras", "Confidencial", "Sistema", "Registro"];
+let current = 0;
+
+// Función para mezclar letras
+function shuffle(word) {
+  return word.split("").sort(() => Math.random() - 0.5).join("");
+}
+
+function startGame() {
+  document.getElementById("intro").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+  showWord();
+}
+
+function showWord() {
+  const word = words[current];
+  const scrambledEl = document.getElementById("scrambled");
+  scrambledEl.textContent = shuffle(word);
+  document.getElementById("counter").textContent = 
+    `Palabra ${current+1} de ${words.length}`;
+  document.getElementById("guess").value = "";
+  document.getElementById("error").textContent = "";
+}
+
+function checkWord() {
+  const guessEl = document.getElementById("guess");
+  const scrambledEl = document.getElementById("scrambled");
+  const errorEl = document.getElementById("error");
+  const guess = guessEl.value.trim();
+  
+  if (guess.toLowerCase() === words[current].toLowerCase()) {
+    const gameBox = document.getElementById("game");
+    gameBox.style.opacity = "0";
+    setTimeout(() => {
+      gameBox.style.opacity = "1";
+      current++;
+      if (current < words.length) {
+        showWord();
+      } else {
+        document.getElementById("quiz").classList.add("hidden");
+        document.getElementById("end").classList.remove("hidden");
+        launchConfetti();
+      }
+    }, 600);
+  } else {
+    errorEl.textContent = "❌ Palabra incorrecta, intenta de nuevo.";
+    scrambledEl.classList.add("shake");
+    setTimeout(() => scrambledEl.classList.remove("shake"), 300);
+  }
+}
+
+// ===== Confetti =====
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let confettiElements = [];
+
+function ConfettiPiece() {
+  this.x = Math.random() * canvas.width;
+  this.y = Math.random() * canvas.height - canvas.height;
+  this.size = Math.random() * 8 + 4;
+  this.speed = Math.random() * 3 + 2;
+  this.color = `hsl(${Math.random()*360}, 100%, 50%)`;
+  this.angle = Math.random() * 2 * Math.PI;
+  this.spin = Math.random() * 0.1;
+}
+
+ConfettiPiece.prototype.update = function() {
+  this.y += this.speed;
+  this.angle += this.spin;
+  if (this.y > canvas.height) this.y = 0;
+};
+
+ConfettiPiece.prototype.draw = function() {
+  ctx.save();
+  ctx.translate(this.x, this.y);
+  ctx.rotate(this.angle);
+  ctx.fillStyle = this.color;
+  ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+  ctx.restore();
+};
+
+function launchConfetti() {
+  confettiElements = [];
+  for(let i=0; i<150; i++){
+    confettiElements.push(new ConfettiPiece());
+  }
+  animateConfetti();
+}
+
+function animateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  confettiElements.forEach(c => { c.update(); c.draw(); });
+  requestAnimationFrame(animateConfetti);
+}
+
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+</body>
+</html>
