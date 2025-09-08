@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juego de Memoria de Protección de Datos</title>
+<title>Juego de Memoria: Protección de Datos CR</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -19,7 +19,7 @@
     background: white;
     border-radius: 15px;
     padding: 20px;
-    max-width: 500px;
+    max-width: 550px;
     width: 90%;
     text-align: center;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -74,11 +74,12 @@
 <body>
 <div class="game-container" id="game">
   <div id="intro">
-    <h2>Lee la historia con atención 🛡️</h2>
+    <h2>Historia sobre protección de datos en Costa Rica 🛡️</h2>
     <p>
-      En la empresa, siempre debemos proteger los <strong>Datos</strong> personales.  
-      Usar contraseñas <strong>Seguras</strong> y nunca compartir información <strong>Confidencial</strong> es crucial.  
-      Solo personal autorizado debe acceder al <strong>Sistema</strong> y todo acceso se registra en el <strong>Registro</strong> de auditoría.
+      En Costa Rica, la <strong>Ley 8968</strong> protege la información personal de los ciudadanos.  
+      Las empresas deben garantizar la seguridad de los <strong>Datos</strong> personales,  
+      usando contraseñas <strong>Seguras</strong>, respetando la información <strong>Confidencial</strong>,  
+      controlando accesos al <strong>Sistema</strong> y manteniendo un <strong>Registro</strong> de todas las operaciones para auditoría.  
     </p>
     <p><em>Recuerda bien las palabras en negrita...</em></p>
     <button onclick="startGame()">¡Estoy listo!</button>
@@ -96,7 +97,7 @@
 
   <div id="end" class="hidden">
     <h2>¡Juego terminado! 🎉</h2>
-    <p>Has recordado todas las palabras clave sobre protección de datos.</p>
+    <p>Has recordado todas las palabras clave sobre protección de datos en Costa Rica.</p>
     <button onclick="location.reload()">Jugar de nuevo</button>
   </div>
 </div>
@@ -107,9 +108,9 @@
 const words = ["Datos", "Seguras", "Confidencial", "Sistema", "Registro"];
 let current = 0;
 
-// Función para mezclar letras
+// Mezclar letras y ponerlas en MAYÚSCULAS
 function shuffle(word) {
-  return word.split("").sort(() => Math.random() - 0.5).join("");
+  return word.toUpperCase().split("").sort(() => Math.random() - 0.5).join("");
 }
 
 function startGame() {
