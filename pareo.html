@@ -334,55 +334,45 @@
         return a;
       }
 
-      function generarJuego() {
-        document.getElementById(
-          "score"
-        ).innerText = `Puntos: 0/${pares.length}`;
-        document.getElementById(
-          "titulo-pareo"
-        ).innerHTML = `Juego de pareo: <b>${tema}</b>`;
+      function generarJuego(pares, tema) {
+  temaActual = tema;
+  paresActuales = pares;
 
-        const board = document.getElementById("game-board");
-        board.innerHTML = `<div class="col-head">Tipos</div><div class="col-head">Ejemplos</div>`;
+  document.getElementById("score").innerText = `Puntos: 0/${pares.length}`;
+  const board = document.getElementById("game-board");
+  board.innerHTML = `<div class="col-head">Tipos</div><div class="col-head">Ejemplos</div>`;
 
-        const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-          .split("")
-          .slice(0, pares.length);
+  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").slice(0, pares.length);
+  const tiposAleatorios = shuffle([...pares]);
+  const tipoLetraMap = {};
+  tiposAleatorios.forEach((tipo, index) => {
+    tipoLetraMap[tipo.tipo] = letras[index];
+  });
 
-        // Mezclar los tipos
-        const tiposAleatorios = shuffle([...pares]);
+  const ejemplosAleatorios = shuffle([...pares]);
 
-        // Crear letra visual para cada tipo
-        const tipoLetraMap = {};
-        tiposAleatorios.forEach((tipo, index) => {
-          tipoLetraMap[tipo.tipo] = letras[index];
-        });
+  for (let i = 0; i < pares.length; i++) {
+    const tipo = tiposAleatorios[i];
+    const letra = tipoLetraMap[tipo.tipo];
+    const ejemplo = ejemplosAleatorios[i];
 
-        // Mezclar ejemplos
-        const ejemplosAleatorios = shuffle([...pares]);
-
-        for (let i = 0; i < pares.length; i++) {
-          const tipo = tiposAleatorios[i];
-          const letra = tipoLetraMap[tipo.tipo];
-          const ejemplo = ejemplosAleatorios[i];
-
-          const row = document.createElement("div");
-          row.className = "row";
-          row.innerHTML = `
-      <div class="item" draggable="true" data-tipo="${
-        tipo.tipo
-      }" data-letra="${letra}">
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="item" draggable="true" data-tipo="${tipo.tipo}" data-letra="${letra}">
         ${letra}) ${tipo.tipo}
       </div>
-      <div class="target" draggable="true" data-tipo="${
-        ejemplo.tipo
-      }" data-letra="${tipoLetraMap[ejemplo.tipo]}">
+      <div class="target" draggable="true" data-tipo="${ejemplo.tipo}" data-letra="${tipoLetraMap[ejemplo.tipo]}">
         ${ejemplo.ejemplo}
       </div>
     `;
-          board.appendChild(row);
-        }
-      }
+    board.appendChild(row);
+  }
+
+  document.getElementById("titulo-pareo").innerHTML = `Juego de pareo: <b>${tema}</b>`;
+}
+
+
 
       function areOppositeSides(a, b) {
         return a.classList.contains("item") !== b.classList.contains("item");
@@ -442,12 +432,10 @@
         document.getElementById(
           "score"
         ).textContent = `Puntos: ${score}/${pares.length}`;
-        generarJuego();
+        generarJuego(pares, tema);
         activarEventos();
         document.querySelector("modal-pareo").close();
-        document.getElementById(
-          "titulo-pareo"
-        ).innerHTML = `Juego de pareo: <b>${tema}</b>`;
+
       }
 
       function activarEventos() {
@@ -501,7 +489,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", () => {
-        generarJuego();
+        generarJuego(pares, tema);
         activarEventos();
         document
           .getElementById("reset-button")
