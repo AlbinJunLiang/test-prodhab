@@ -1,526 +1,525 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Juego de Clasificación - Tipos de Datos</title>
-<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<style>
-  html {
-    scroll-behavior: smooth;
-  }
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Juego de Clasificación Dinámico</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Raleway", sans-serif;
+      }
+      body {
+        background: #f8fafc;
+        color: #333;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+      }
+      .container {
+        max-width: 1000px;
+        width: 100%;
+        margin: auto;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      h1 {
+        font-size: 2rem;
+        color: #1e355e;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+      .card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        align-items: stretch;
+        grid-auto-rows: auto;
+      }
+      .col-head {
+        text-align: center;
+        color: #1e355e;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+      .row {
+        display: contents;
+      }
+      .item,
+      .target {
+        background: #f7f7f7;
+        padding: 12px;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 60px;
+        display: block;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        white-space: normal;
+        text-align: left;
+        position: relative;
+      }
+      .item.selected,
+      .target.selected {
+        background: #dbeafe;
+        border-color: #2563eb;
+      }
+      .disabled {
+        background: #e2e8f0;
+        color: #94a3b8;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .correct {
+        border-color: #1e355e;
+        background: #f0fdf4;
+        cursor: not-allowed;
+      }
+      .incorrect {
+        border-color: #c74b27;
+        background: #fef2f2;
+      }
+      .score-panel {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        background: #fff;
+        padding: 10px;
+        border-radius: 8px;
+      }
+      .reset-button {
+        background: #1e355e;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.2s ease; /* transición suave */
+      }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: "Raleway", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  }
+      .reset-button:hover {
+        transform: scale(1.1); /* se agranda un 10% al pasar el mouse */
+      }
 
-  body {
-    color: #333;
-    line-height: 1.6;
-    padding: 10px;
-    min-height: 100vh;
-    background-color: #f8fafc;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
+      .completed-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: none;
+        text-align: center;
+      }
 
-  .container {
-    max-width: 1000px;
-    margin: 0 auto;
-    width: 100%;
-  }
+      .feedback {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.8rem;
+        font-weight: bold;
+        display: none;
+        z-index: 9999;
+        text-align: center;
+      }
 
-  header {
-    text-align: center;
-    margin-bottom: 15px;
-    padding: 15px;
-  }
+      .feedback.correcto {
+        color: #1e355e;
+      }
 
-  h1 {
-    font-size: 2rem;
-    color: #2563eb;
-    margin-bottom: 8px;
-    font-weight: 700;
-  }
+      .feedback.incorrecto {
+        color: #c74b27;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1 id="titulo-pareo">Juego de Clasificación Dinámico</h1>
+        <p class="subtitle">Relaciona cada tipo con su ejemplo correcto</p>
+      </header>
 
-  .subtitle {
-    font-size: 1rem;
-    color: #64748b;
-    max-width: 90%;
-    margin: 0 auto;
-  }
-
-  .wrap {
-    display: grid;
-    place-items: center;
-    width: 100%;
-  }
-
-  .card {
-    width: 100%;
-    background: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    max-width: 1000px;
-    margin: 0 auto;
-    overflow-x: auto;
-  }
-
-  .column {
-    flex: 1;
-    width: 50%;
-    min-width: 45%;
-    max-width: 50%;
-  }
-
-  h2 {
-    text-align: center;
-    color: #2563eb;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #e2e8f0;
-    font-size: 1.2rem;
-    font-weight: 600;
-  }
-
-  .item, .target {
-    background: #f1f5f9;
-    padding: 12px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 2px solid transparent;
-    font-size: 0.9rem;
-    min-height: 48px;
-    touch-action: manipulation;
-    margin: 8px 0;
-  }
-
-  .item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .item:active:not(.disabled), .target:active:not(.correct) {
-    background: #e0f2fe;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1);
-  }
-
-  .item.selected {
-    background: #dbeafe;
-    border-color: #2563eb;
-  }
-
-  .item.disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .target {
-    background: #f8fafc;
-    border: 2px dashed #cbd5e1;
-  }
-
-  .target.correct {
-    border-color: #16a34a;
-    background: #f0fdf4;
-    cursor: not-allowed;
-  }
-
-  .target.incorrect {
-    border-color: #dc2626;
-    background: #fef2f2;
-  }
-
-  .score-panel {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-    padding: 10px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    width: 100%;
-    max-width: 1000px;
-    gap: 8px;
-  }
-
-  .score {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #2563eb;
-  }
-
-  .reset-button {
-    background: #2563eb;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    min-width: 100px;
-    transition: background 0.3s;
-  }
-
-  .reset-button:hover {
-    background: #1d4ed8;
-  }
-
-  .instructions {
-    margin-top: 10px;
-    text-align: center;
-    color: #64748b;
-    font-size: 0.8rem;
-    max-width: 90%;
-  }
-
-  .completed-message {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    z-index: 100;
-    display: none;
-    max-width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-
-  .completed-message h2 {
-    margin-bottom: 10px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #16a34a;
-  }
-
-  .completed-message p {
-    margin-bottom: 15px;
-    color: #475569;
-    font-size: 0.9rem;
-  }
-
-  @media (min-width: 768px) {
-    body {
-      padding: 20px;
-    }
-
-    header {
-      margin-bottom: 30px;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-    }
-
-    .subtitle {
-      font-size: 1.2rem;
-    }
-
-    .card {
-      padding: 20px;
-      gap: 20px;
-    }
-
-    .column {
-      min-width: 250px;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 10px;
-    }
-
-    .item, .target {
-      font-size: 1rem;
-      padding: 15px;
-      margin: 10px 0;
-      min-height: 60px;
-    }
-
-    .item:hover:not(.disabled) {
-      background: #e0f2fe;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(37, 99, 235, 0.1);
-      border-color: #2563eb;
-    }
-
-    .score-panel {
-      padding: 15px 20px;
-      gap: 15px;
-    }
-
-    .score {
-      font-size: 1.1rem;
-    }
-
-    .reset-button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      min-width: 120px;
-    }
-
-    .instructions {
-      font-size: 0.9rem;
-    }
-
-    .completed-message {
-      padding: 30px;
-      max-width: 600px;
-    }
-
-    .completed-message h2 {
-      font-size: 1.5rem;
-    }
-
-    .completed-message p {
-      font-size: 1rem;
-    }
-  }
-</style>
-</head>
-<body>
-<div class="container">
-  <header>
-    <h1>Juego de Clasificación - Tipos de Datos</h1>
-    <p class="subtitle mobile-instructions">Haz clic en un tipo de dato y luego en su ejemplo correspondiente.</p>
-    <p class="subtitle desktop-instructions" style="display: none;">Arrastra los tipos de datos a sus ejemplos correspondientes o haz clic en un tipo y luego en su ejemplo.</p>
-  </header>
-
-  <div class="wrap">
-    <div class="card">
-      <div class="column" id="tipos">
-        <h2>Tipos de Datos</h2>
-        <div class="item" draggable="true" data-tipo="Acceso Irrestricto">Datos de Acceso Irrestricto</div>
-        <div class="item" draggable="true" data-tipo="Acceso Restringido">Datos de Acceso Restringido</div>
-        <div class="item" draggable="true" data-tipo="Sensibles">Datos Sensibles</div>
-        <div class="item" draggable="true" data-tipo="Comportamiento Crediticio">Datos de Comportamiento Crediticio</div>
+      <div
+        style="
+          height: 50px;
+          display: flex;
+          justify-content: center; /* centra horizontalmente */
+          align-items: center; /* centra verticalmente */
+          position: relative; /* por si quieres position absolute dentro */
+        "
+      >
+        <img
+          src="superdato_1.png"
+          alt="Robot señalando"
+          style="
+            width: 130px; /* tamaño del robot */
+            pointer-events: none; /* no bloquea interacciones */
+            margin-top: 1%;
+          "
+        />
       </div>
-      
-      <div class="column" id="ejemplos">
-        <h2>Ejemplos</h2>
-        <div class="target" data-accept="Acceso Irrestricto">Nombres en un directorio público</div>
-        <div class="target" data-accept="Acceso Restringido">Datos de registros públicos con acceso limitado</div>
-        <div class="target" data-accept="Sensibles">Información sobre la salud de una persona</div>
-        <div class="target" data-accept="Comportamiento Crediticio">Historial de pagos de un préstamo</div>
+
+      <div class="card" id="game-board"></div>
+
+      <div class="score-panel">
+        <div id="score"></div>
+        <button class="reset-button" id="reset-button">Reiniciar</button>
       </div>
+
+      <modal-pareo
+        title="¡Muy bien!"
+        img="superdato_volando.png"
+        link="https://www.prodhab.go.cr/"
+      >
+      </modal-pareo>
+      <div id="feedback" class="feedback"></div>
     </div>
-  </div>
 
-  <div class="score-panel">
-    <div class="score" id="score">Puntos: 0/4</div>
-    <button class="reset-button" id="reset-button">Reiniciar Juego</button>
-  </div>
+    <script>
+      // Banco organizado por temas
+      const bancoDePares = {
+        datos: [
+          {
+            tipo: "Datos de Acceso Irrestricto",
+            ejemplo: "Nombres en un directorio público",
+          },
+          {
+            tipo: "Datos de Acceso Restringido",
+            ejemplo: "Datos de registros públicos con acceso limitado",
+          },
+          {
+            tipo: "Datos Sensibles",
+            ejemplo: "Información sobre la salud de una persona",
+          },
+          {
+            tipo: "Datos de Comportamiento Crediticio",
+            ejemplo: "Historial de pagos de un préstamo",
+          },
+        ],
+        ciberseguridad: [
+          {
+            tipo: "Phishing",
+            ejemplo:
+              "Correo falso que simula ser de un banco para robar credenciales",
+          },
+          {
+            tipo: "Malware",
+            ejemplo:
+              "Programa malicioso que daña o roba información de un sistema",
+          },
+          {
+            tipo: "Firewall",
+            ejemplo: "Sistema que filtra el tráfico de red no autorizado",
+          },
+          {
+            tipo: "Ingeniería Social",
+            ejemplo:
+              "Engañar a una persona para obtener contraseñas o datos sensibles",
+          },
+        ],
+        prodhab: [
+          {
+            tipo: "Creación de PRODHAB",
+            ejemplo: "Se estableció en 2011 mediante la Ley N.º 8968",
+          },
+          {
+            tipo: "Misión",
+            ejemplo:
+              "Proteger la privacidad de los ciudadanos y regular el uso de datos personales",
+          },
+          {
+            tipo: "Dependencia",
+            ejemplo:
+              "Adscrita al Ministerio de Justicia y Paz con independencia técnica y administrativa",
+          },
+          {
+            tipo: "Dirección Nacional",
+            ejemplo:
+              "Dicta políticas generales en materia técnica, administrativa y organizacional",
+          },
+          {
+            tipo: "Auditoría Interna",
+            ejemplo:
+              "Fiscaliza bienes, operaciones y obligaciones de la Agencia",
+          },
+          {
+            tipo: "Visión",
+            ejemplo:
+              "Ser reconocida por transparencia y buenas prácticas en protección de datos",
+          },
+          {
+            tipo: "Resolución relevante",
+            ejemplo:
+              "Resolución N.º 697–2023: medida cautelar sobre acceso a información de crédito",
+          },
+          {
+            tipo: "Derecho protegido",
+            ejemplo:
+              "Autodeterminación informativa: control sobre los datos personales",
+          },
+        ],
+      };
 
-  <div class="instructions">
-    <p class="mobile-instructions">💡 Selecciona un tipo de dato de la izquierda y luego haz clic en su ejemplo correspondiente a la derecha</p>
-    <p class="desktop-instructions" style="display: none;">💡 Puedes arrastrar los tipos de datos a sus ejemplos o hacer clic en un tipo y luego en su ejemplo</p>
-  </div>
-
-  <div class="completed-message" id="completed-message">
-    <h2>¡Felicidades!</h2>
-    <p>Has clasificado correctamente todos los tipos de datos.</p>
-    <button class="reset-button" onclick="resetGame()">Jugar de nuevo</button>
-  </div>
-</div>
-
-<script>
-let score = 0;
-const totalPairs = 4;
-let matchedPairs = 0;
-let selectedTipo = null;
-
-// Función para barajar elementos
-function shuffleElements(container) {
-  const elements = Array.from(container.children).filter(child => child.classList.contains('item') || child.classList.contains('target'));
-  for (let i = elements.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    container.insertBefore(elements[j], elements[i]);
-  }
-}
-
-// Detectar si es dispositivo móvil
-function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-}
-
-// Inicializar el juego
-document.addEventListener('DOMContentLoaded', function() {
-  // Barajar tipos y ejemplos al inicio
-  shuffleElements(document.getElementById('tipos'));
-  shuffleElements(document.getElementById('ejemplos'));
-
-  // Mostrar instrucciones según el dispositivo
-  if (isMobileDevice()) {
-    document.querySelectorAll('.mobile-instructions').forEach(el => el.style.display = 'block');
-    document.querySelectorAll('.desktop-instructions').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.item').forEach(item => item.removeAttribute('draggable'));
-  } else {
-    document.querySelectorAll('.mobile-instructions').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('.desktop-instructions').forEach(el => el.style.display = 'block');
-  }
-
-  // Configurar eventos de arrastre (solo desktop)
-  if (!isMobileDevice()) {
-    document.querySelectorAll(".item").forEach(item => {
-      item.addEventListener("dragstart", e => {
-        if (!item.classList.contains('disabled')) {
-          e.dataTransfer.setData("text/plain", item.dataset.tipo);
-        }
-      });
-    });
-
-    document.querySelectorAll(".target").forEach(target => {
-      target.addEventListener("dragover", e => {
-        if (!target.classList.contains('correct')) {
-          e.preventDefault();
-        }
-      });
-
-      target.addEventListener("drop", e => {
-        e.preventDefault();
-        const tipo = e.dataTransfer.getData("text/plain");
-        checkMatch(tipo, target);
-      });
-    });
-  }
-
-  // Configurar eventos de clic/tap para tipos
-  document.querySelectorAll(".item").forEach(item => {
-    item.addEventListener("click", function(e) {
-      if (this.classList.contains('disabled')) return;
-      if (selectedTipo) {
-        selectedTipo.classList.remove('selected');
+      // Función para elegir un tema aleatorio
+      function obtenerTemaAleatorio() {
+        const temas = Object.keys(bancoDePares);
+        const randomIndex = Math.floor(Math.random() * temas.length);
+        return temas[randomIndex];
       }
-      this.classList.add('selected');
-      selectedTipo = this;
-    });
 
-    item.addEventListener("touchstart", function(e) {
-      if (this.classList.contains('disabled')) return;
-      e.preventDefault();
-      if (selectedTipo) {
-        selectedTipo.classList.remove('selected');
+      // Función para seleccionar pares de un tema aleatorio
+      function obtenerParesAleatorios(n) {
+        const tema = obtenerTemaAleatorio(); // 🎲 Tema al azar
+        const pares = bancoDePares[tema];
+
+        const seleccionados = [];
+        const usados = new Set();
+
+        while (seleccionados.length < n && usados.size < pares.length) {
+          const randomIndex = Math.floor(Math.random() * pares.length);
+          if (!usados.has(randomIndex)) {
+            seleccionados.push(pares[randomIndex]);
+            usados.add(randomIndex);
+          }
+        }
+
+        return { tema, pares: seleccionados };
       }
-      this.classList.add('selected');
-      selectedTipo = this;
-    }, { passive: false });
-  });
 
-  // Configurar eventos de clic/tap para ejemplos
-  document.querySelectorAll(".target").forEach(target => {
-    target.addEventListener("click", function() {
-      if (!selectedTipo || this.classList.contains('correct')) return;
-      const tipo = selectedTipo.dataset.tipo;
-      checkMatch(tipo, this);
-      selectedTipo.classList.remove('selected');
-      selectedTipo = null;
-    });
+      // Ejemplo: dame 3 pares de un tema aleatorio
+      const { tema, pares } = obtenerParesAleatorios(4);
 
-    target.addEventListener("touchstart", function(e) {
-      e.preventDefault();
-      if (!selectedTipo || this.classList.contains('correct')) return;
-      const tipo = selectedTipo.dataset.tipo;
-      checkMatch(tipo, this);
-      selectedTipo.classList.remove('selected');
-      selectedTipo = null;
-    }, { passive: false });
-  });
+      console.log("Tema elegido:", tema);
+      console.log("Pares:", pares);
 
-  // Configurar botón de reinicio
-  document.getElementById("reset-button").addEventListener("click", resetGame);
-});
+      let score = 0;
+      let matchedPairs = 0;
+      let selected = null;
+      let dragData = null;
 
-function checkMatch(tipo, target) {
-  if (target.classList.contains('correct')) {
-    return;
-  }
-  
-  if (target.dataset.accept === tipo) {
-    target.classList.add("correct");
-    const originalText = target.dataset.accept === "Acceso Irrestricto" ? 
-      "Nombres en un directorio público" :
-      target.dataset.accept === "Acceso Restringido" ? 
-      "Datos de registros públicos con acceso limitado" :
-      target.dataset.accept === "Sensibles" ? 
-      "Información sobre la salud de una persona" :
-      "Historial de pagos de un préstamo";
-    target.textContent = `${originalText} (${tipo})`;
-    score++;
-    matchedPairs++;
-    document.getElementById("score").textContent = `Puntos: ${score}/${totalPairs}`;
-    
-    const matchedItem = document.querySelector(`.item[data-tipo="${tipo}"]`);
-    if (matchedItem) {
-      matchedItem.classList.add('disabled');
-      matchedItem.removeAttribute('draggable');
-    }
-    
-    if (matchedPairs === totalPairs) {
-      setTimeout(() => {
-        document.getElementById('completed-message').style.display = 'block';
-      }, 500);
-    }
-  } else {
-    target.classList.add("incorrect");
-    setTimeout(() => {
-      target.classList.remove("incorrect");
-    }, 1000);
-  }
-}
+      function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
 
-function resetGame() {
-  score = 0;
-  matchedPairs = 0;
-  selectedTipo = null;
-  document.getElementById("score").textContent = `Puntos: ${score}/${totalPairs}`;
-  
-  document.querySelectorAll(".target").forEach(target => {
-    target.classList.remove("correct", "incorrect");
-    target.style.cursor = 'pointer';
-    const originalText = target.dataset.accept === "Acceso Irrestricto" ? 
-      "Nombres en un directorio público" :
-      target.dataset.accept === "Acceso Restringido" ? 
-      "Datos de registros públicos con acceso limitado" :
-      target.dataset.accept === "Sensibles" ? 
-      "Información sobre la salud de una persona" :
-      "Historial de pagos de un préstamo";
-    target.textContent = originalText;
-  });
-  
-  document.querySelectorAll(".item").forEach(item => {
-    item.classList.remove("disabled", "selected");
-    if (!isMobileDevice()) {
-      item.setAttribute('draggable', true);
-    }
-  });
-  
-  shuffleElements(document.getElementById('tipos'));
-  shuffleElements(document.getElementById('ejemplos'));
-  
-  document.getElementById('completed-message').style.display = 'none';
-}
-</script>
-</body>
+      function generarJuego() {
+        document.getElementById(
+          "score"
+        ).innerText = `Puntos: 0/${pares.length}`;
+        document.getElementById(
+          "titulo-pareo"
+        ).innerHTML = `Juego de pareo: <b>${tema}</b>`;
+
+        const board = document.getElementById("game-board");
+        board.innerHTML = `<div class="col-head">Tipos</div><div class="col-head">Ejemplos</div>`;
+
+        const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          .split("")
+          .slice(0, pares.length);
+
+        // Mezclar los tipos
+        const tiposAleatorios = shuffle([...pares]);
+
+        // Crear letra visual para cada tipo
+        const tipoLetraMap = {};
+        tiposAleatorios.forEach((tipo, index) => {
+          tipoLetraMap[tipo.tipo] = letras[index];
+        });
+
+        // Mezclar ejemplos
+        const ejemplosAleatorios = shuffle([...pares]);
+
+        for (let i = 0; i < pares.length; i++) {
+          const tipo = tiposAleatorios[i];
+          const letra = tipoLetraMap[tipo.tipo];
+          const ejemplo = ejemplosAleatorios[i];
+
+          const row = document.createElement("div");
+          row.className = "row";
+          row.innerHTML = `
+      <div class="item" draggable="true" data-tipo="${
+        tipo.tipo
+      }" data-letra="${letra}">
+        ${letra}) ${tipo.tipo}
+      </div>
+      <div class="target" draggable="true" data-tipo="${
+        ejemplo.tipo
+      }" data-letra="${tipoLetraMap[ejemplo.tipo]}">
+        ${ejemplo.ejemplo}
+      </div>
+    `;
+          board.appendChild(row);
+        }
+      }
+
+      function areOppositeSides(a, b) {
+        return a.classList.contains("item") !== b.classList.contains("item");
+      }
+      function checkMatch(el1, el2) {
+        if (!areOppositeSides(el1, el2)) return;
+        const tipo1 = el1.dataset.tipo;
+        const tipo2 = el2.dataset.tipo;
+
+        if (tipo1 === tipo2) {
+          mostrarFeedback("¡Correcto!", true);
+
+          const letra = el1.dataset.letra || el2.dataset.letra;
+
+          // Si es item (izquierda) ya tiene letra, no la repito
+          if (el1.classList.contains("item")) {
+            el2.textContent = `${letra}) ${el2.textContent.replace(
+              /^[A-Z]\)\s*/,
+              ""
+            )}`;
+          } else {
+            el1.textContent = `${letra}) ${el1.textContent.replace(
+              /^[A-Z]\)\s*/,
+              ""
+            )}`;
+          }
+
+          [el1, el2].forEach((el) => {
+            el.classList.add("correct", "disabled");
+            el.removeAttribute("draggable");
+            el.classList.remove("selected");
+          });
+
+          score++;
+          matchedPairs++;
+          document.getElementById(
+            "score"
+          ).textContent = `Puntos: ${score}/${pares.length}`;
+          if (matchedPairs === pares.length) {
+            setTimeout(() => document.querySelector("modal-pareo").open(), 300);
+          }
+        } else {
+          el2.classList.add("incorrect");
+          mostrarFeedback("Incorrecto", false);
+
+          setTimeout(() => el2.classList.remove("incorrect"), 500);
+          el1.classList.remove("selected");
+        }
+      }
+
+      function resetGame() {
+        const { tema, pares } = obtenerParesAleatorios(4);
+        score = 0;
+        matchedPairs = 0;
+        selected = null;
+        dragData = null;
+        document.getElementById(
+          "score"
+        ).textContent = `Puntos: ${score}/${pares.length}`;
+        generarJuego();
+        activarEventos();
+        document.querySelector("modal-pareo").close();
+        document.getElementById(
+          "titulo-pareo"
+        ).innerHTML = `Juego de pareo: <b>${tema}</b>`;
+      }
+
+      function activarEventos() {
+        const cells = document.querySelectorAll(".item, .target");
+        cells.forEach((el) => {
+          el.addEventListener("click", () => {
+            if (el.classList.contains("disabled")) return;
+            if (!selected) {
+              el.classList.add("selected");
+              selected = el;
+              return;
+            }
+            if (!areOppositeSides(selected, el)) {
+              selected.classList.remove("selected");
+              el.classList.add("selected");
+              selected = el;
+              return;
+            }
+            checkMatch(selected, el);
+            selected = null;
+          });
+
+          el.addEventListener("dragstart", (e) => {
+            if (el.classList.contains("disabled")) {
+              e.preventDefault();
+              return;
+            }
+            dragData = el;
+            e.dataTransfer.setData("text/plain", el.dataset.tipo);
+          });
+
+          el.addEventListener("dragend", () => (dragData = null));
+
+          el.addEventListener("dragover", (e) => {
+            if (
+              !el.classList.contains("disabled") &&
+              dragData &&
+              areOppositeSides(dragData, el)
+            )
+              e.preventDefault();
+          });
+
+          el.addEventListener("drop", (e) => {
+            e.preventDefault();
+            if (!dragData || el.classList.contains("disabled")) return;
+            if (!areOppositeSides(dragData, el)) return;
+            checkMatch(dragData, el);
+            dragData = null;
+          });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        generarJuego();
+        activarEventos();
+        document
+          .getElementById("reset-button")
+          .addEventListener("click", resetGame);
+      });
+
+      function mostrarFeedback(mensaje, esCorrecto) {
+        const feedback = document.getElementById("feedback");
+        feedback.textContent = mensaje;
+        feedback.className =
+          "feedback " + (esCorrecto ? "correcto" : "incorrecto");
+        feedback.style.display = "block";
+
+        setTimeout(() => {
+          feedback.style.display = "none";
+        }, 1000); // desaparece después de 1 segundo
+      }
+    </script>
+    <script src="modal-pareo.js"></script>
+  </body>
 </html>
