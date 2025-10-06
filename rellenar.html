@@ -5,32 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Juego de Rellenar Espacios - Seguridad</title>
 <style>
-body { font-family:'Poppins',sans-serif; background:#f4f7fb; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; user-select:none; }
-.app { width:96vw; max-width:900px; background:#fff; border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.06); transition:opacity 0.5s; }
+body { 
+  font-family:'Poppins',sans-serif; 
+  background:#f4f7fb; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  min-height:100vh; 
+  margin:0; 
+  user-select:none; 
+}
+.app { 
+  width:96vw; 
+  max-width:900px; 
+  background:#fff; 
+  border-radius:16px; 
+  padding:24px; 
+  box-shadow:0 10px 25px rgba(0,0,0,0.06); 
+  transition:opacity 0.5s; 
+}
 h1 { color:#02297b; text-align:center; }
 .text-container { margin:20px 0; font-size:1.1rem; line-height:1.6; }
-.blank { 
-  display:inline-block; 
-  min-width:80px; 
-  min-height:30px; 
-  padding:8px 6px; 
-  margin:0 4px; 
-  border-bottom:2px solid #2563eb; 
-  vertical-align:middle; 
-  background:#eef2ff; 
-  cursor:pointer; 
-  transition: background 0.2s; 
-  user-select:none; 
-  text-align:center; 
-  color:#000; 
-  font-size:1rem; 
-  line-height:30px; 
+
+.blank {
+  display: inline-block;        /* para poder poner un width */
+  min-width: 50px;              /* ancho mínimo de la línea */
+  border-bottom: 2px solid #2563eb; /* la línea azul */
+  margin: 0 2px;                /* pequeño espacio a los lados */
+  vertical-align: text-bottom;  /* alineado con el texto */
+  text-align: center;           /* texto centrado si se llena */
+  color: #000;
+  font-size: 1rem;
+  line-height: 1.2;             /* igual que el texto */
+  background: transparent;      /* sin fondo */
+  padding: 0;                   /* sin padding extra */
 }
-.blank.filled { 
-  background:#dcfce7; 
-  border-color:#161ba3; 
-  color:#000; 
+.blank.filled {
+  background: transparent;
+  border-color: #161ba3;
+  color: #000;
 }
+
 .words-container { display:flex; flex-wrap:wrap; gap:12px; margin-top:20px; }
 .word { 
   padding:6px 12px; 
@@ -44,7 +59,7 @@ h1 { color:#02297b; text-align:center; }
 .word:active { transform: scale(1.05); }
 .footer { margin-top:16px; text-align:center; font-size:1rem; color:#64748b; }
 @media (max-width:600px) { 
-  .blank { min-width:60px; min-height:24px; line-height:24px; font-size:0.9rem; } 
+  .blank { min-width:60px; min-height:20px; line-height:20px; font-size:0.9rem; padding:3px 6px; } 
   .word { padding:6px 10px; font-size:0.9rem; }
 }
 </style>
@@ -58,21 +73,17 @@ h1 { color:#02297b; text-align:center; }
 </div>
 
 <script>
-
-
 const rounds = [
   { text: "Nunca compartas tu ___1___ con extraños, ni siquiera en redes ___2___.", blanks: ["contraseña", "sociales"] },
   { text: "Protege tus datos mediante ___1___ fuertes y no uses la misma ___2___ en varios servicios.", blanks: ["claves", "contraseña"] },
   { text: "Activa la ___1___ en tus cuentas y evita hacer clic en enlaces ___2___ que recibas por correo.", blanks: ["autenticación", "sospechosos"] },
-  { text: "No compartas tu ___1___ y revisa siempre los  ___2___ de ___3___ de tus cuentas.", blanks: ["usuario", "ajustes", "privacidad"] } // nueva ronda
+  { text: "No compartas tu ___1___ y revisa siempre los ___2___ de ___3___ de tus cuentas.", blanks: ["usuario", "ajustes", "privacidad"] }
 ];
 
-
 let roundIndex = 0;
-let isTransitioning = false; // Evitar múltiples transiciones
+let isTransitioning = false;
 
 function startRound() {
-  console.log("Iniciando ronda:", roundIndex + 1);
   const container = document.getElementById("textContainer");
   const wordsContainer = document.getElementById("wordsContainer");
   container.innerHTML = "";
@@ -81,10 +92,9 @@ function startRound() {
   const round = rounds[roundIndex];
   document.getElementById("footer").textContent = `Ronda ${roundIndex + 1} de ${rounds.length}`;
 
-  // Generar blanks dinámicamente
+  // Generar blanks
   const parts = round.text.split(/___\d+___/);
   const blanks = [];
-  container.innerHTML = "";
   for (let i = 0; i < parts.length; i++) {
     container.append(parts[i]);
     if (i < round.blanks.length) {
@@ -96,27 +106,21 @@ function startRound() {
     }
   }
 
-  // Mezclar palabras y mostrarlas
+  // Mezclar palabras
   const shuffled = shuffle([...round.blanks]);
   shuffled.forEach(word => {
     const div = document.createElement("div");
     div.className = "word";
     div.textContent = word;
     div.addEventListener("click", () => {
-      console.log("Clic en palabra:", word);
-      // Buscar el primer blank vacío en orden
       const emptyBlank = blanks.find(b => !b.classList.contains("filled"));
       if (emptyBlank) {
-        console.log("Blank objetivo:", emptyBlank.dataset.answer);
         const correctAnswer = emptyBlank.dataset.answer.toLowerCase();
         if (word.toLowerCase() === correctAnswer) {
           moveWordToBlank(div, emptyBlank);
         } else {
-          console.log("Palabra incorrecta, mostrando retroalimentación");
           emptyBlank.style.background = "#fee2e2";
-          setTimeout(() => {
-            emptyBlank.style.background = "#eef2ff";
-          }, 300);
+          setTimeout(() => { emptyBlank.style.background = "#eef2ff"; }, 300);
         }
       }
     });
@@ -125,7 +129,6 @@ function startRound() {
 }
 
 function moveWordToBlank(wordEl, blankEl) {
-  console.log("Moviendo palabra:", wordEl.textContent, "a blank con respuesta:", blankEl.dataset.answer);
   const wordRect = wordEl.getBoundingClientRect();
   const blankRect = blankEl.getBoundingClientRect();
   const clone = wordEl.cloneNode(true);
@@ -147,22 +150,16 @@ function moveWordToBlank(wordEl, blankEl) {
   clone.addEventListener("transitionend", () => {
     blankEl.textContent = wordEl.textContent;
     blankEl.classList.add("filled");
-    console.log("Blank actualizado, textContent:", blankEl.textContent);
     clone.remove();
     wordEl.remove();
     checkRoundComplete();
-  }, { once: true }); // Ejecutar solo una vez
+  }, { once: true });
 }
 
 function checkRoundComplete() {
-  if (isTransitioning) {
-    console.log("Transición en curso, ignorando checkRoundComplete");
-    return;
-  }
+  if (isTransitioning) return;
   const blanks = document.querySelectorAll(".blank");
-  console.log("Revisando ronda, blanks llenos:", Array.from(blanks).filter(b => b.classList.contains("filled")).length, "de", blanks.length);
   if (Array.from(blanks).every(b => b.classList.contains("filled"))) {
-    console.log("Ronda completada, pasando a la siguiente. roundIndex:", roundIndex);
     isTransitioning = true;
     const app = document.getElementById("app");
     app.classList.remove("fade-in");
@@ -170,12 +167,10 @@ function checkRoundComplete() {
     setTimeout(() => {
       roundIndex++;
       if (roundIndex < rounds.length) {
-        console.log("Iniciando nueva ronda:", roundIndex + 1);
         startRound();
         app.classList.remove("fade-out");
         app.classList.add("fade-in");
       } else {
-        console.log("Juego terminado");
         document.getElementById("textContainer").textContent = "¡Juego completado!";
         document.getElementById("wordsContainer").innerHTML = "";
         document.getElementById("footer").textContent = "";
