@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juego 4</title>
+<style>
+body { font-family:'Poppins',sans-serif; background:#f4f7fb; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; user-select:none; }
+.app { width:96vw; max-width:900px; background:#fff; border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.06); transition:opacity 0.5s; }
+h1 { color:#02297b; text-align:center; }
+.text-container { margin:20px 0; font-size:1.1rem; line-height:1.6; }
+.blank { 
+  display:inline-block; 
+  min-width:80px; 
+  min-height:30px; /* Aumentar el alto del espacio */
+  padding:8px 6px; /* Aumentar padding para mayor área */
+  margin:0 4px; 
+  border-bottom:2px solid #2563eb; 
+  vertical-align:middle; 
+  background:#eef2ff; 
+  cursor:pointer; 
+  transition: background 0.2s; 
+  user-select:none; 
+  text-align:center; 
+  color:#000; 
+  font-size:1rem; 
+  line-height:30px; /* Centrar verticalmente el texto */
+}
+.blank.filled { 
+  background:#dcfce7; 
+  border-color:#161ba3; 
+  color:#000; 
+}
+.words-container { display:flex; flex-wrap:wrap; gap:12px; margin-top:20px; }
+.word { padding:6px 12px; background:#04205d; color:white; border-radius:12px; cursor:pointer; transition: transform 0.2s; user-select:none; }
+.word:active { transform: scale(1.05); }
+.fade-out { opacity:0; } 
+.fade-in { opacity:1; }
+.footer { margin-top:16px; text-align:center; font-size:1rem; color:#64748b; }
+@media (max-width:600px){ 
+  .blank { min-width:60px; min-height:24px; line-height:24px; } 
+}
+</style>
+</head>
+<body>
+
+<div class="app fade-in" id="app">
+  <h1>Llene los espacios en blanco</h1>
+  <div class="text-container" id="textContainer"></div>
+  <div class="words-container" id="wordsContainer"></div>
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+// --- Textos y blanks ---
+const rounds = [
+  { text: "La ___1___ brilla en el ___2___ durante la ___3___.", blanks: ["luna", "cielo", "noche"] },
+  { text: "El ___1___ se llena de agua y las ___2___ crecen en el ___3___.", blanks: ["río", "plantas", "valle"] },
+  { text: "Los ___1___ vuelan y cantan en la ___2___ mientras el ___3___ calienta.", blanks: ["pájaros", "mañana", "sol"] }
+];
+
+let roundIndex = 0;
+
+function startRound() {
+  const container = document.getElementById("textContainer");
+  const wordsContainer = document.getElementById("wordsContainer");
+  container.innerHTML = "";
+  wordsContainer.innerHTML = "";
+
+  const round = rounds[roundIndex];
+  document.getElementById("footer").textContent = `Ronda ${roundIndex + 1} de ${rounds.length}`;
+
+  // Generar blanks
+  let txt = round.text;
+  round.blanks.forEach((word, i) => {
+    txt = txt.replace(`___${i + 1}___`, `<span class="blank" data-answer="${word}"></span>`);
+  });
+  container.innerHTML = txt;
+
+  const blanks = Array.from(container.querySelectorAll(".blank"));
+  blanks.forEach(blank => {
+    blank.addEventListener("dragover", e => {
+      e.preventDefault();
+      console.log("Dragover en blank:", blank.dataset.answer);
+    });
+    blank.addEventListener("drop", e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const word = e.dataTransfer.getData("text/plain");
+      console.log("Drop recibido, palabra:", word);
+      if (word) placeWord(blank, word);
+    });
+  });
+
+  // Mezclar y mostrar palabras
+  const shuffled = shuffle([...round.blanks]);
+  shuffled.forEach(word => {
+    const div = document.createElement("div");
+    div.className = "word";
+    div.textContent = word;
+    div.setAttribute("draggable", "true");
+    div.addEventListener("dragstart", e => {
+      console.log("Dragstart, palabra:", word);
+      e.dataTransfer.setData("text/plain", word);
+      e.dataTransfer.effectAllowed = "move";
+    });
+    wordsContainer.appendChild(div);
+  });
+}
+
+// --- Colocar palabra ---
+function placeWord(blank, word) {
+  console.log("placeWord - Palabra arrastrada:", word);
+  console.log("placeWord - Respuesta esperada:", blank.dataset.answer);
+
+  const normalizedWord = word.trim().toLowerCase();
+  const normalizedAnswer = blank.dataset.answer.trim().toLowerCase();
+
+  if (normalizedAnswer === normalizedWord) {
+    console.log("Coincidencia correcta, actualizando blank con:", word);
+    blank.textContent = word;
+    blank.classList.add("filled");
+    blank.setAttribute("data-filled", "true");
+    console.log("Blank actualizado, textContent:", blank.textContent);
+    const el = Array.from(document.querySelectorAll(".word")).find(w => w.textContent === word);
+    if (el) {
+      console.log("Eliminando palabra de la lista:", word);
+      el.remove();
+    } else {
+      console.warn("No se encontró la palabra en la lista:", word);
+    }
+    checkRoundComplete();
+  } else {
+    console.log("Coincidencia incorrecta, mostrando retroalimentación");
+    blank.style.background = "#fee2e2";
+    setTimeout(() => {
+      blank.style.background = "#eef2ff";
+    }, 200);
+  }
+}
+
+// --- Revisar si la ronda terminó ---
+function checkRoundComplete() {
+  const blanks = document.querySelectorAll(".blank");
+  console.log("Revisando si la ronda está completa, blanks llenos:", Array.from(blanks).filter(b => b.classList.contains("filled")).length);
+  if (Array.from(blanks).every(b => b.classList.contains("filled"))) {
+    console.log("Ronda completada, pasando a la siguiente");
+    const app = document.getElementById("app");
+    app.classList.remove("fade-in");
+    app.classList.add("fade-out");
+    setTimeout(() => {
+      roundIndex++;
+      if (roundIndex < rounds.length) {
+        startRound();
+        app.classList.remove("fade-out");
+        app.classList.add("fade-in");
+      } else {
+        document.getElementById("textContainer").textContent = "🎉 ¡Juego completado!";
+        document.getElementById("wordsContainer").innerHTML = "";
+        document.getElementById("footer").textContent = "";
+      }
+    }, 500);
+  }
+}
+
+// --- Mezclar array ---
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+startRound();
+</script>
+</body>
+</html>
