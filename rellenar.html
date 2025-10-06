@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Juego 4</title>
+<title>Juego de Rellenar Espacios - Seguridad</title>
 <style>
 body { font-family:'Poppins',sans-serif; background:#f4f7fb; display:flex; justify-content:center; align-items:center; min-height:100vh; margin:0; user-select:none; }
 .app { width:96vw; max-width:900px; background:#fff; border-radius:16px; padding:24px; box-shadow:0 10px 25px rgba(0,0,0,0.06); transition:opacity 0.5s; }
@@ -12,8 +12,8 @@ h1 { color:#02297b; text-align:center; }
 .blank { 
   display:inline-block; 
   min-width:80px; 
-  min-height:30px; /* Aumentar el alto del espacio */
-  padding:8px 6px; /* Aumentar padding para mayor área */
+  min-height:30px; 
+  padding:8px 6px; 
   margin:0 4px; 
   border-bottom:2px solid #2563eb; 
   vertical-align:middle; 
@@ -24,7 +24,7 @@ h1 { color:#02297b; text-align:center; }
   text-align:center; 
   color:#000; 
   font-size:1rem; 
-  line-height:30px; /* Centrar verticalmente el texto */
+  line-height:30px; 
 }
 .blank.filled { 
   background:#dcfce7; 
@@ -32,18 +32,24 @@ h1 { color:#02297b; text-align:center; }
   color:#000; 
 }
 .words-container { display:flex; flex-wrap:wrap; gap:12px; margin-top:20px; }
-.word { padding:6px 12px; background:#04205d; color:white; border-radius:12px; cursor:pointer; transition: transform 0.2s; user-select:none; }
+.word { 
+  padding:6px 12px; 
+  background:#04205d; 
+  color:white; 
+  border-radius:12px; 
+  cursor:pointer; 
+  transition: transform 0.2s; 
+  user-select:none; 
+}
 .word:active { transform: scale(1.05); }
-.fade-out { opacity:0; } 
-.fade-in { opacity:1; }
 .footer { margin-top:16px; text-align:center; font-size:1rem; color:#64748b; }
-@media (max-width:600px){ 
-  .blank { min-width:60px; min-height:24px; line-height:24px; } 
+@media (max-width:600px) { 
+  .blank { min-width:60px; min-height:24px; line-height:24px; font-size:0.9rem; } 
+  .word { padding:6px 10px; font-size:0.9rem; }
 }
 </style>
 </head>
 <body>
-
 <div class="app fade-in" id="app">
   <h1>Llene los espacios en blanco</h1>
   <div class="text-container" id="textContainer"></div>
@@ -52,16 +58,21 @@ h1 { color:#02297b; text-align:center; }
 </div>
 
 <script>
-// --- Textos y blanks ---
+
+
 const rounds = [
-  { text: "La ___1___ brilla en el ___2___ durante la ___3___.", blanks: ["luna", "cielo", "noche"] },
-  { text: "El ___1___ se llena de agua y las ___2___ crecen en el ___3___.", blanks: ["río", "plantas", "valle"] },
-  { text: "Los ___1___ vuelan y cantan en la ___2___ mientras el ___3___ calienta.", blanks: ["pájaros", "mañana", "sol"] }
+  { text: "Nunca compartas tu ___1___ con extraños, ni siquiera en redes ___2___.", blanks: ["contraseña", "sociales"] },
+  { text: "Protege tus datos mediante ___1___ fuertes y no uses la misma ___2___ en varios servicios.", blanks: ["claves", "contraseña"] },
+  { text: "Activa la ___1___ en tus cuentas y evita hacer clic en enlaces ___2___ que recibas por correo.", blanks: ["autenticación", "sospechosos"] },
+  { text: "No compartas tu ___1___ y revisa siempre los  ___2___ de ___3___ de tus cuentas.", blanks: ["usuario", "ajustes", "privacidad"] } // nueva ronda
 ];
 
+
 let roundIndex = 0;
+let isTransitioning = false; // Evitar múltiples transiciones
 
 function startRound() {
+  console.log("Iniciando ronda:", roundIndex + 1);
   const container = document.getElementById("textContainer");
   const wordsContainer = document.getElementById("wordsContainer");
   container.innerHTML = "";
@@ -70,100 +81,110 @@ function startRound() {
   const round = rounds[roundIndex];
   document.getElementById("footer").textContent = `Ronda ${roundIndex + 1} de ${rounds.length}`;
 
-  // Generar blanks
-  let txt = round.text;
-  round.blanks.forEach((word, i) => {
-    txt = txt.replace(`___${i + 1}___`, `<span class="blank" data-answer="${word}"></span>`);
-  });
-  container.innerHTML = txt;
+  // Generar blanks dinámicamente
+  const parts = round.text.split(/___\d+___/);
+  const blanks = [];
+  container.innerHTML = "";
+  for (let i = 0; i < parts.length; i++) {
+    container.append(parts[i]);
+    if (i < round.blanks.length) {
+      const span = document.createElement("span");
+      span.className = "blank";
+      span.dataset.answer = round.blanks[i];
+      container.appendChild(span);
+      blanks.push(span);
+    }
+  }
 
-  const blanks = Array.from(container.querySelectorAll(".blank"));
-  blanks.forEach(blank => {
-    blank.addEventListener("dragover", e => {
-      e.preventDefault();
-      console.log("Dragover en blank:", blank.dataset.answer);
-    });
-    blank.addEventListener("drop", e => {
-      e.preventDefault();
-      e.stopPropagation();
-      const word = e.dataTransfer.getData("text/plain");
-      console.log("Drop recibido, palabra:", word);
-      if (word) placeWord(blank, word);
-    });
-  });
-
-  // Mezclar y mostrar palabras
+  // Mezclar palabras y mostrarlas
   const shuffled = shuffle([...round.blanks]);
   shuffled.forEach(word => {
     const div = document.createElement("div");
     div.className = "word";
     div.textContent = word;
-    div.setAttribute("draggable", "true");
-    div.addEventListener("dragstart", e => {
-      console.log("Dragstart, palabra:", word);
-      e.dataTransfer.setData("text/plain", word);
-      e.dataTransfer.effectAllowed = "move";
+    div.addEventListener("click", () => {
+      console.log("Clic en palabra:", word);
+      // Buscar el primer blank vacío en orden
+      const emptyBlank = blanks.find(b => !b.classList.contains("filled"));
+      if (emptyBlank) {
+        console.log("Blank objetivo:", emptyBlank.dataset.answer);
+        const correctAnswer = emptyBlank.dataset.answer.toLowerCase();
+        if (word.toLowerCase() === correctAnswer) {
+          moveWordToBlank(div, emptyBlank);
+        } else {
+          console.log("Palabra incorrecta, mostrando retroalimentación");
+          emptyBlank.style.background = "#fee2e2";
+          setTimeout(() => {
+            emptyBlank.style.background = "#eef2ff";
+          }, 300);
+        }
+      }
     });
     wordsContainer.appendChild(div);
   });
 }
 
-// --- Colocar palabra ---
-function placeWord(blank, word) {
-  console.log("placeWord - Palabra arrastrada:", word);
-  console.log("placeWord - Respuesta esperada:", blank.dataset.answer);
+function moveWordToBlank(wordEl, blankEl) {
+  console.log("Moviendo palabra:", wordEl.textContent, "a blank con respuesta:", blankEl.dataset.answer);
+  const wordRect = wordEl.getBoundingClientRect();
+  const blankRect = blankEl.getBoundingClientRect();
+  const clone = wordEl.cloneNode(true);
+  clone.style.position = "absolute";
+  clone.style.left = wordRect.left + "px";
+  clone.style.top = wordRect.top + "px";
+  clone.style.margin = "0";
+  clone.style.zIndex = 1000;
+  clone.style.transition = "all 0.5s ease";
+  document.body.appendChild(clone);
 
-  const normalizedWord = word.trim().toLowerCase();
-  const normalizedAnswer = blank.dataset.answer.trim().toLowerCase();
+  clone.getBoundingClientRect();
+  const deltaX = blankRect.left + blankRect.width / 2 - (wordRect.left + wordRect.width / 2);
+  const deltaY = blankRect.top + blankRect.height / 2 - (wordRect.top + wordRect.height / 2);
 
-  if (normalizedAnswer === normalizedWord) {
-    console.log("Coincidencia correcta, actualizando blank con:", word);
-    blank.textContent = word;
-    blank.classList.add("filled");
-    blank.setAttribute("data-filled", "true");
-    console.log("Blank actualizado, textContent:", blank.textContent);
-    const el = Array.from(document.querySelectorAll(".word")).find(w => w.textContent === word);
-    if (el) {
-      console.log("Eliminando palabra de la lista:", word);
-      el.remove();
-    } else {
-      console.warn("No se encontró la palabra en la lista:", word);
-    }
+  clone.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(0.8)`;
+  clone.style.opacity = 0.7;
+
+  clone.addEventListener("transitionend", () => {
+    blankEl.textContent = wordEl.textContent;
+    blankEl.classList.add("filled");
+    console.log("Blank actualizado, textContent:", blankEl.textContent);
+    clone.remove();
+    wordEl.remove();
     checkRoundComplete();
-  } else {
-    console.log("Coincidencia incorrecta, mostrando retroalimentación");
-    blank.style.background = "#fee2e2";
-    setTimeout(() => {
-      blank.style.background = "#eef2ff";
-    }, 200);
-  }
+  }, { once: true }); // Ejecutar solo una vez
 }
 
-// --- Revisar si la ronda terminó ---
 function checkRoundComplete() {
+  if (isTransitioning) {
+    console.log("Transición en curso, ignorando checkRoundComplete");
+    return;
+  }
   const blanks = document.querySelectorAll(".blank");
-  console.log("Revisando si la ronda está completa, blanks llenos:", Array.from(blanks).filter(b => b.classList.contains("filled")).length);
+  console.log("Revisando ronda, blanks llenos:", Array.from(blanks).filter(b => b.classList.contains("filled")).length, "de", blanks.length);
   if (Array.from(blanks).every(b => b.classList.contains("filled"))) {
-    console.log("Ronda completada, pasando a la siguiente");
+    console.log("Ronda completada, pasando a la siguiente. roundIndex:", roundIndex);
+    isTransitioning = true;
     const app = document.getElementById("app");
     app.classList.remove("fade-in");
     app.classList.add("fade-out");
     setTimeout(() => {
       roundIndex++;
       if (roundIndex < rounds.length) {
+        console.log("Iniciando nueva ronda:", roundIndex + 1);
         startRound();
         app.classList.remove("fade-out");
         app.classList.add("fade-in");
       } else {
-        document.getElementById("textContainer").textContent = "🎉 ¡Juego completado!";
+        console.log("Juego terminado");
+        document.getElementById("textContainer").textContent = "¡Juego completado!";
         document.getElementById("wordsContainer").innerHTML = "";
         document.getElementById("footer").textContent = "";
       }
+      isTransitioning = false;
     }, 500);
   }
 }
 
-// --- Mezclar array ---
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
