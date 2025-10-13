@@ -156,7 +156,14 @@ h1 {
       <div class="footer">
         <div>Encontradas: <strong id="foundCount">0</strong>/<span id="goal">0</span></div>
         <div id="msg"></div>
+        
+      <button id="btnRestart" style="margin-top:10px; padding:6px 12px; border-radius:6px; border:none; background:#021e5b; color:white; cursor:pointer;">
+  Reiniciar Sopa
+</button>
       </div>
+
+
+
     </section>
     <section>
       <p style="margin:0 0 6px; font-size:0.9rem;">Palabras a encontrar</p>
@@ -425,6 +432,11 @@ function getCell(x,y){ return document.querySelector(`.cell[data-x="${x}"][data-
 
 nuevoJuego();
 document.getElementById('modal2').open()
+
+document.getElementById('btnRestart').addEventListener('click', () => {
+  nuevoJuego();
+});
+
 </script>
 
 </body>
