@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sopa de Letras - Seguridad</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    /><style>
 :root {
   --bg: #f4f7fb;
   --panel: #fff;
@@ -17,7 +19,7 @@
   --border: #dbe1ea;
 }
 
-* { box-sizing: border-box; font-family:'Poppins',sans-serif; }
+* { box-sizing: border-box; font-family:'Raleway',sans-serif; }
 
 body {
   margin:0;
@@ -39,7 +41,7 @@ body {
 
 h1 {
   text-align:center;
-  color:var(--accent);
+  color: rgb(23, 4, 150);
   margin-bottom:8px;
   font-size:1.5rem;
 }
@@ -51,13 +53,20 @@ h1 {
 }
 
 .board {
-  display:grid;
-  gap:2px;
-  background:var(--card);
-  border-radius:8px;
-  padding:4px;
-  border:1px solid var(--border);
+  display: grid;
+  gap: 2px;
+  background: var(--card);
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid var(--border);
+
+  /* Evitar scroll */
+  width: 100%;
+  height: auto;      /* que se ajuste al contenido */
+  max-width: 100%;   /* no exceda contenedor */
+  overflow: hidden;  /* desactiva scroll */
 }
+
 
 .cell {
   width:100%;
@@ -74,16 +83,23 @@ h1 {
   transition:background .2s;
   min-width:20px;
   min-height:20px;
+    color: #021034; /* azul oscuro */
+
 }
+
 
 .cell.sel { background:#dbeafe; border-color:var(--accent); }
-.cell.found { background:#dcfce7; border-color:var(--ok); color:#065f46; }
-.cell.dim { opacity:.4; }
-
-.words {
-  display:grid;
-  gap:6px;
+.cell.found { 
+  background:#dbeafe;       /* azul claro */
+  border-color:#3b82f6;     /* azul brillante */
+  color:#1e3a8a;            /* texto azul oscuro */
 }
+.cell.dim { 
+  background: #fed7aa; /* naranja claro de fondo */
+}
+
+
+.words { display:grid; gap:6px; }
 
 .word {
   background:#fff;
@@ -96,7 +112,12 @@ h1 {
   font-size:0.9rem;
 }
 
-.word.found { border-color:var(--ok); background:#f0fdf4; }
+.word.found {
+  border-color: #3b82f6;  /* azul brillante para el borde */
+  background: #dbeafe;    /* azul claro de fondo */
+  color: #1e3a8a;         /* azul oscuro para el texto */
+}
+
 
 .footer { 
   display:flex; 
@@ -105,6 +126,9 @@ h1 {
   color:var(--muted); 
   font-size:.8rem; 
 }
+
+
+
 
 @media (max-width:900px) { 
   .layout { grid-template-columns:1fr; }
@@ -115,15 +139,8 @@ h1 {
 @media (max-width:375px) { 
   .app { padding:8px; }
   .board { gap:1px; }
-  .cell { 
-    min-width:18px; 
-    min-height:18px; 
-    font-size:10px; 
-  }
-  .word { 
-    padding:.3rem .5rem; 
-    font-size:0.8rem; 
-  }
+  .cell { min-width:18px; min-height:18px; font-size:10px; }
+  .word { padding:.3rem .5rem; font-size:0.8rem; }
   .footer { font-size:.7rem; }
   h1 { font-size:1.1rem; }
 }
@@ -132,7 +149,7 @@ h1 {
 <body>
 
 <div class="app">
-  <h1>Sopa de Letras - Seguridad</h1>
+  <h1>Sopa de Letras - Ciberseguridad</h1>
   <div class="layout">
     <section>
       <div id="board" class="board"></div>
@@ -146,8 +163,32 @@ h1 {
       <div id="words" class="words"></div>
     </section>
   </div>
+
+
+<modal-pareo 
+    id="modal1"
+    title="¡Felicidades! Has completado la sopa de letras." 
+    img="vuela.png"
+    link="https://www.prodhab.go.cr/"
+    animated
+    float
+    opaque>
+</modal-pareo>
+
+
+<modal-pareo 
+    id="modal2"
+title="Encuentra las palabras seleccionando de la primera a la última letra."
+    video="superdato_anotando.webm"
+    link="https://www.prodhab.go.cr/"
+        opaque>
+
+</modal-pareo>
+
+
 </div>
 
+<script src="modal-juego.js"></script>
 <script>
 const ABC = [..."ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"];
 const DIRS = [
@@ -157,39 +198,34 @@ const DIRS = [
 const rand = n => Math.floor(Math.random()*n);
 const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=rand(i+1); [a[i],a[j]]=[a[j],a[i]] } return a; }
 
-let size=14, grid=[], words=[], placed=[], found=new Set();
+let size=14, grid=[], placed=[], found=new Set();
 let selecting=false, path=[], firstClick=null;
 
-// Palabras de 14 letras o menos, relacionadas con seguridad
-words = [
-  "AUTENTICACION", // 13 letras
-  "CIBERSEGURIDAD", // 14 letras
-  "ENCRIPTACION", // 12 letras
-  "ANTIVIRUS", // 9 letras
-  "FIREWALL" // 8 letras
+let words = [
+  "CONTRASEÑA",
+  "ENCRIPTAR",
+  "ANTIVIRUS",
+  "CORTAFUEGOS",
+  "PHISHING",
+  "SEGURIDAD",
+  "FRAUDE"
 ];
 
+
+words = words.slice(0,7).filter(w=>w.length<=14);
+
 function nuevoJuego(){
-  console.log("Iniciando nuevo juego");
   grid = Array.from({length:size},()=>Array(size).fill(''));
   placed.length=0; path.length=0; firstClick=null; found.clear();
-  const sorted = [...words].sort((a,b)=>b.length-a.length); // Ordenar de mayor a menor longitud
+  const sorted = [...words].sort((a,b)=>b.length-a.length);
 
-  sorted.forEach(w=>{
-    if(w.length<=size){ // Permitir palabras de 14 letras o menos
-      console.log("Intentando colocar palabra:", w);
-      if(colocarPalabra(w)){
-        console.log("Palabra colocada:", w);
-      } else {
-        console.warn("No se pudo colocar palabra:", w);
-      }
-    }
-  });
+  sorted.forEach(w=>colocarPalabra(w));
 
-  // Llenar vacíos
   for(let y=0;y<size;y++){
     for(let x=0;x<size;x++){
-      if(!grid[y][x]) grid[y][x]=ABC[rand(ABC.length)];
+      //if(!grid[y][x]) grid[y][x]="";
+            if(!grid[y][x]) grid[y][x]=ABC[rand(ABC.length)];
+
     }
   }
 
@@ -200,39 +236,53 @@ function nuevoJuego(){
   document.getElementById('msg').textContent = '';
 }
 
-function puedeColocar(word,x,y,dir){
-  for(let i=0;i<word.length;i++){
-    const nx=x+i*dir.dx, ny=y+i*dir.dy;
-    if(nx<0||ny<0||nx>=size||ny>=size) return false;
-    const c=grid[ny][nx];
-    if(c && c!=='' && c!==word[i]) return false;
-  }
-  return true;
-}
-
 function colocarPalabra(word){
   const dirs = shuffle([...DIRS]);
-  for(let attempt=0; attempt<500; attempt++){
-    const dir = dirs[attempt % dirs.length];
-    const maxStartX = dir.dx === 0 ? size : size - word.length * dir.dx;
-    const maxStartY = dir.dy === 0 ? size : size - word.length * dir.dy;
-    const startX = rand(maxStartX + 1), startY = rand(maxStartY + 1);
-    if(puedeColocar(word,startX,startY,dir)){
-      const coords=[];
-      for(let i=0;i<word.length;i++){
-        const x=startX+i*dir.dx, y=startY+i*dir.dy;
-        grid[y][x]=word[i];
-        coords.push([x,y]);
+  const reversed = Math.random()<0.5;
+  const w = reversed ? [...word].reverse().join('') : word;
+  let bestSpot = null;
+  let bestOverlap = -1;
+
+  for(const dir of dirs){
+    let minX = 0, maxX = size-1, minY = 0, maxY = size-1;
+    if(dir.dx === 1) maxX = size - w.length;
+    if(dir.dx === -1) minX = w.length - 1;
+    if(dir.dy === 1) maxY = size - w.length;
+    if(dir.dy === -1) minY = w.length - 1;
+
+    for(let y=minY; y<=maxY; y++){
+      for(let x=minX; x<=maxX; x++){
+        let overlap = 0, valid = true;
+        for(let i=0;i<w.length;i++){
+          const nx=x+i*dir.dx, ny=y+i*dir.dy;
+          const c=grid[ny][nx];
+          if(nx<0||ny<0||nx>=size||ny>=size){ valid=false; break; }
+          if(c && c!=='' && c!==w[i]){ valid=false; break; }
+          if(c === w[i]) overlap++;
+        }
+        if(valid && overlap > bestOverlap){
+          bestOverlap = overlap;
+          bestSpot = {x,y,dir};
+        }
       }
-      placed.push({word,coords});
-      return true;
     }
+  }
+
+  if(bestSpot){
+    const {x,y,dir} = bestSpot;
+    const coords=[];
+    for(let i=0;i<w.length;i++){
+      const nx=x+i*dir.dx, ny=y+i*dir.dy;
+      grid[ny][nx]=w[i];
+      coords.push([nx,ny]);
+    }
+    placed.push({word,coords});
+    return true;
   }
   return false;
 }
 
 function renderBoard(){
-  console.log("Renderizando tablero");
   const board=document.getElementById('board');
   board.innerHTML='';
   board.style.gridTemplateColumns=`repeat(${size}, 1fr)`;
@@ -256,7 +306,6 @@ function renderBoard(){
 }
 
 function renderWords(){
-  console.log("Renderizando lista de palabras");
   const cont=document.getElementById('words'); cont.innerHTML='';
   words.forEach(w=>{
     const div=document.createElement('div'); div.className='word'; div.id=`w-${w}`;
@@ -265,37 +314,21 @@ function renderWords(){
   });
 }
 
-function startSel(e){ 
-  selecting=true; clearTemp(); addToPath(e.currentTarget); 
-  console.log("Inicio selección (mouse):", e.currentTarget.dataset.x, e.currentTarget.dataset.y);
-}
-
-function extendSel(e){ 
-  if(selecting) addToPath(e.currentTarget); 
-}
-
+function startSel(e){ selecting=true; clearTemp(); addToPath(e.currentTarget); }
+function extendSel(e){ if(selecting) addToPath(e.currentTarget); }
 function startSelTouch(e){ 
   const el = document.elementFromPoint(e.changedTouches[0].clientX,e.changedTouches[0].clientY)?.closest('.cell'); 
-  if(el){
-    selecting=true; clearTemp(); addToPath(el);
-    console.log("Inicio selección (toque):", el.dataset.x, el.dataset.y);
-  }
+  if(el){ selecting=true; clearTemp(); addToPath(el); }
 }
-
 function extendSelTouch(e){ 
   const el = document.elementFromPoint(e.changedTouches[0].clientX,e.changedTouches[0].clientY)?.closest('.cell'); 
   if(el && selecting) addToPath(el);
 }
-
-function touchEndHandler(e){ 
-  if(selecting) endSel();
-  console.log("Fin selección (toque)");
-}
+function touchEndHandler(e){ if(selecting) endSel(); }
 
 function handleClick(e){
   const cell = e.currentTarget;
   const x = parseInt(cell.dataset.x), y = parseInt(cell.dataset.y);
-  console.log("Clic en celda:", x, y);
   if(!firstClick){ 
     firstClick={x,y}; clearTemp(); cell.classList.add('sel'); 
   } else {
@@ -316,7 +349,7 @@ function getLineBetween(a,b){
   const stepX=Math.sign(dx), stepY=Math.sign(dy);
   if(dx!==0 && dy!==0 && Math.abs(dx)!==Math.abs(dy)) return null;
   const len=Math.max(Math.abs(dx),Math.abs(dy))+1;
-  if(len > size) return null; // No permitir selecciones más largas que el tablero
+  if(len > size) return null;
   const arr=[];
   let x=a.x, y=a.y;
   for(let i=0;i<len;i++){ 
@@ -332,21 +365,42 @@ function endSel(){
   selecting=false;
   const palabra=path.map(c=>grid[c.y][c.x]).join('');
   const palabraR=[...palabra].reverse().join('');
-  console.log("Palabra seleccionada:", palabra);
-  const match=placed.find(p=>{ const s=p.coords.map(c=>grid[c[1]][c[0]]).join(''); return s===palabra||s===palabraR; });
+  const match=placed.find(p=>{
+    const s=p.coords.map(c=>grid[c[1]][c[0]]).join('');
+    return s===palabra||s===palabraR;
+  });
   if(match && !found.has(match.word)){
     found.add(match.word);
     path.forEach(c=>getCell(c.x,c.y)?.classList.add('found'));
     document.getElementById(`w-${match.word}`)?.classList.add('found');
-    document.getElementById(`s-${match.word}`).textContent='✅';
     document.getElementById('foundCount').textContent=found.size;
-    console.log("Palabra encontrada:", match.word, "Total encontradas:", found.size);
     if(found.size===words.length) {
-      console.log("Juego completado");
-      document.getElementById('msg').textContent='🎉 ¡Completado!';
+      document.getElementById('msg').textContent='¡Completado!';
+
+      // Seleccionas el modal y la imagen dentro del Shadow DOM
+const modal = document.getElementById('modal1');
+const img = modal.shadowRoot.querySelector('#character');
+
+// Voltear horizontal (efecto espejo)
+img.style.transform = "scaleX(-1)";
+
+// O voltear vertical
+// img.style.transform = "scaleY(-1)";
+
+// O rotar 180 grados
+// img.style.transform = "rotate(180deg)";
+
+// Cambiar tamaño
+img.style.width = '200px';   // ancho fijo
+img.style.height = 'auto';   // altura proporcional
+// o para máximo ancho relativo al modal
+// img.style.maxWidth = '80%'; 
+
+// Abrir modal
+modal.open();
+
     }
   } else { 
-    console.log("Palabra no válida o ya encontrada");
     path.forEach(c=>getCell(c.x,c.y)?.classList.add('dim')); 
     setTimeout(()=>path.forEach(c=>getCell(c.x,c.y)?.classList.remove('dim')),300); 
   }
@@ -359,7 +413,6 @@ function addToPath(cellEl){
   if(path.length && path[path.length-1].x===x && path[path.length-1].y===y) return;
   path.push({x,y});
   cellEl.classList.add('sel');
-  console.log("Añadiendo a la selección:", x, y);
 }
 
 function clearTemp(keep=false){
@@ -371,6 +424,7 @@ function clearTemp(keep=false){
 function getCell(x,y){ return document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`); }
 
 nuevoJuego();
+document.getElementById('modal2').open()
 </script>
 
 </body>
