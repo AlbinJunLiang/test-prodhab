@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sopa de Letras - Seguridad</title>
+<title>Sopa de Letras - Comidas típicas</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
@@ -149,7 +149,7 @@ h1 {
 <body>
 
 <div class="app">
-  <h1>Sopa de Letras - Ciberseguridad</h1>
+  <h1>Sopa de Letras - Comidas típicas</h1>
   <div class="layout">
     <section>
       <div id="board" class="board"></div>
@@ -209,15 +209,13 @@ let size=14, grid=[], placed=[], found=new Set();
 let selecting=false, path=[], firstClick=null;
 
 let words = [
-  "CONTRASEÑA",
-  "ENCRIPTAR",
-  "ANTIVIRUS",
-  "CORTAFUEGOS",
-  "PHISHING",
-  "SEGURIDAD",
-  "FRAUDE"
-];
-
+  "GALLOPINTO",
+  "TAMALES",
+  "CHORREADAS",
+  "CASADO",
+  "OLLADECARNE",
+  "SOPANEGRA", 
+  "CHIFRIJO"];
 
 words = words.slice(0,7).filter(w=>w.length<=14);
 
