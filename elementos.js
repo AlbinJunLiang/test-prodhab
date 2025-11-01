@@ -13,7 +13,7 @@ const frutas = [
 ];
 
 // Exportar la lista de frutas
-export default frutas;
+//export default frutas;
 
 
 const frut = [ "Manzana", "Banana", "Naranja" ];
