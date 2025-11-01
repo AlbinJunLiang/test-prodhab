@@ -17,4 +17,4 @@ export default frutas;
 
 
 const frut = [ "Manzana", "Banana", "Naranja" ];
-window.frutas = frut; // Exponer globalmente
+window.frut = frut; // Exponer globalmente
